@@ -1,0 +1,30 @@
+program error_sintactico
+var
+    a, b : int;
+    c float;
+ 
+int suma(x : int, y : int) [
+    {
+        return x + y;
+    }
+]
+ 
+main {
+    a = 3 + * 4;
+    b = 5 < 3 < 2;
+    c = -(a + b);
+    if a > b [
+        print('a mayor');
+    ];
+    while (a < 10) [
+        a = a + 1;
+    ];
+    if (a != b) [
+        print('distintos');
+    ]
+    print();
+    read(a + 1);
+    a == b;
+    5 = a;
+    print('total: ' + 'algo');
+}

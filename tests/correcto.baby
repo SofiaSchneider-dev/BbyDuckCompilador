@@ -1,0 +1,21 @@
+program demo;
+var x, y : int;
+    z : float;
+
+int doble(a : int) [
+    {
+        return a * 2;
+    }
+];
+
+main {
+    read(x);
+    y = doble(x) + -3;
+    z = (x + y) / 2.5;
+    if (z > 1.0) 
+    print('mayor', z); 
+    
+    else print('menor'); ;
+    while (x != 0) do [ x = x - 1; print(x); ];
+}
+end

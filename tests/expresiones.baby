@@ -1,0 +1,11 @@
+program expresiones;
+var
+    a, b, c : int;
+main {
+    a = 30; b = 50;
+    c = (a + b) * 2;
+    if (c < 180) [
+        print('c es menor que 180');
+    ];
+}
+end

@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+*.pyc
+
+# Archivos que PLY genera solo
+parser.out
+parsetab.py
+
+# macOS y VS Code
+.DS_Store
+.vscode/

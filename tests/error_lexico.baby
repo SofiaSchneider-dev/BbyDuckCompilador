@@ -1,0 +1,20 @@
+program error_lexico;
+var
+    a, b_ : int;
+    c, _d : float;
+ 
+main {
+    a = 5$;
+    b# = a + 3;
+    c = .5;
+    c = 5.;
+    print('hola);
+    if (a > 2) [
+        a = a?;
+    ];
+    c = 2.5&;
+    while (a > 0) do [
+        a = a - 1@;
+    ];
+}
+end

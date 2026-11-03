@@ -1,0 +1,17 @@
+program Funciones;
+
+var
+    res : int;
+
+void hola() [
+    {
+    print('hola mundo');
+    }
+];
+
+main{
+    hola();
+    res = 3;
+    print('Resultado:', res);
+}
+end
