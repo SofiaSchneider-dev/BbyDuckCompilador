@@ -1,0 +1,7 @@
+program dobles;
+var x, y : int;
+    x : float;
+main {
+    x = 1;
+}
+end

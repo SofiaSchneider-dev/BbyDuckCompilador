@@ -47,6 +47,9 @@ cases = [
     ("Programa con funciones", "funciones.baby", True),
     ("Errores léxicos", "error_lexico.baby", False),
     ("Errores sintácticos", "error_sintactico.baby", False),
+    ("Variable doblemente declarada", "error_variable_doble.baby", False),
+    ("Variable no declarada", "error_variable_no_declarada.baby", False),
+    ("Función doblemente declarada", "error_funcion_doble.baby", False),
 ]
 
 

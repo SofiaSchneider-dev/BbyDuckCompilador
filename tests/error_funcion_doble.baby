@@ -1,0 +1,16 @@
+program funciones;
+var r : int;
+int suma(a : int, b : int) [
+    {
+        return a + b;
+    }
+];
+void suma() [
+    {
+        print('otra');
+    }
+];
+main {
+    r = suma(1, 2);
+}
+end

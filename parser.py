@@ -2,6 +2,9 @@
 import ply.yacc as yacc
 
 from lexer import tokens
+from semantica.directorio_funciones import DirectorioFunciones
+
+dir_func = None   # el directorio de funcones se inicializa cuando se encuentra la palabra reservada "program"
 
 start = 'programa'
 
@@ -11,12 +14,28 @@ class ErrorSintactico(Exception):
 
 
 def p_programa(p):
-    'programa : PROGRAM ID FINISHDOT listvars listfuncs MAIN body END'
+    'programa : prog_head FINISHDOT listvars listfuncs MAIN body END'
+
+
+def p_prog_head(p):
+    'prog_head : program_palabra ID'
+    dir_func.agregar_programa(p[2])
+
+
+def p_program_palabra(p):
+    'program_palabra : PROGRAM'
+    global dir_func
+    dir_func = DirectorioFunciones()
 
 
 def p_listvars(p):
-    '''listvars : VAR vardecks
+    '''listvars : var_palabra vardecks
                 | empty'''
+
+
+def p_var_palabra(p):
+    'var_palabra : VAR'
+    dir_func.crear_tabla_variables()
 
 
 def p_vardecks(p):
@@ -26,16 +45,22 @@ def p_vardecks(p):
 
 def p_vardeck(p):
     'vardeck : idlist TYPEASSIGNDOT type FINISHDOT'
+    dir_func.declarar_variables(p[1], p[3])
 
 
 def p_idlist(p):
     '''idlist : ID
               | idlist REPEATDOT ID'''
+    if len(p) == 2:
+        p[0] = [(p[1], p.lineno(1))]
+    else:
+        p[0] = p[1] + [(p[3], p.lineno(3))]
 
 
 def p_type(p):
     '''type : INT
             | FLOAT'''
+    p[0] = p[1]
 
 
 # ===================== Funciones =====================
@@ -46,12 +71,19 @@ def p_listfuncs(p):
 
 
 def p_funcs(p):
-    'funcs : functype ID OPENPAR paramslist CLOSEPAR OPENBRACKET listvars body CLOSEBRACKET FINISHDOT'
+    'funcs : func_head OPENPAR paramslist CLOSEPAR OPENBRACKET listvars body CLOSEBRACKET FINISHDOT'
+    dir_func.terminar_funcion()
+
+
+def p_func_head(p):
+    'func_head : functype ID'
+    dir_func.agregar_funcion(p[2], p[1], p.lineno(2))
 
 
 def p_functype(p):
     '''functype : VOID
                 | type'''
+    p[0] = p[1]
 
 
 def p_paramslist(p):
@@ -66,6 +98,7 @@ def p_params(p):
 
 def p_parameter(p):
     'parameter : ID TYPEASSIGNDOT type'
+    dir_func.agregar_parametro(p[1], p[3], p.lineno(1))
 
 
 # ===================== Estatutos =====================
@@ -92,6 +125,7 @@ def p_statement(p):
 
 def p_assign(p):
     'assign : ID ASSIGNOP expression FINISHDOT'
+    dir_func.buscar_variable(p[1], p.lineno(1))
 
 
 def p_condition(p):
@@ -123,6 +157,7 @@ def p_printelem(p):
 
 def p_readstatement(p):
     'readstatement : READ OPENPAR ID CLOSEPAR FINISHDOT'
+    dir_func.buscar_variable(p[3], p.lineno(3))
 
 
 def p_returnstatement(p):
@@ -150,15 +185,19 @@ def p_term(p):
 
 def p_factor(p):
     '''factor : OPENPAR expression CLOSEPAR
+              | idorcte
               | EXPOPERATOR idorcte
-              | cte
-              | ID
               | call'''
 
 
-def p_idorcte(p):
-    '''idorcte : ID
-               | cte'''
+def p_idorcte_id(p):
+    'idorcte : ID'
+    dir_func.buscar_variable(p[1], p.lineno(1)) 
+    #buscar variable en la expresion
+
+
+def p_idorcte_cte(p):
+    'idorcte : cte'
 
 
 def p_cte(p):
@@ -169,6 +208,7 @@ def p_cte(p):
 def p_call(p):
     '''call : ID OPENPAR arglist CLOSEPAR
             | ID OPENPAR CLOSEPAR'''
+    dir_func.buscar_funcion(p[1], p.lineno(1))
 
 
 def p_arglist(p):
