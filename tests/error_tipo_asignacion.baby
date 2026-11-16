@@ -1,0 +1,7 @@
+program ErrorTipo;
+var a : int;
+
+main {
+    a = 2.5 * 2;
+}
+end

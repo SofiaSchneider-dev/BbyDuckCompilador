@@ -1,7 +1,9 @@
+import sys
 from pathlib import Path
 
 from lexer import nuevo_lexer, errores
 from parser import nuevo_parser
+import parser as parser_baby   # para leer el generador (gen) después de compilar
 
 parser = nuevo_parser()
 
@@ -29,6 +31,8 @@ def test(nombre_test, archivo, debe_pasar):
         print("✓ Análisis léxico y sintáctico correcto")
         if debe_pasar:
             print("La prueba pasa sin errores como se esperaba")
+            print()
+            parser_baby.gen.imprimir()               # fila de cuádruplos
             return True
         print("La prueba debía fallar pero pasó")
         return False
@@ -50,6 +54,10 @@ cases = [
     ("Variable doblemente declarada", "error_variable_doble.baby", False),
     ("Variable no declarada", "error_variable_no_declarada.baby", False),
     ("Función doblemente declarada", "error_funcion_doble.baby", False),
+    ("Cuádruplos de expresiones y estatutos lineales", "cuadruplos.baby", True),
+    ("Precedencia y paréntesis", "precedencia.baby", True),
+    ("Asignar float a int", "error_tipo_asignacion.baby", False),
+    ("Imprimir una comparación", "error_imprimir_comparacion.baby", False),
 ]
 
 
@@ -60,6 +68,27 @@ def runtests():
     print(f"Pruebas: {passed}/{len(cases)} dieron el resultado esperado")
 
 
+def correr_uno(archivo):
+    # acepta "precedencia", "precedencia.baby" o "tests/precedencia.baby"
+    archivo = Path(archivo).name
+    if not archivo.endswith(".baby"):
+        archivo += ".baby"
+    if not Path("tests", archivo).exists():
+        print(f"No existe el archivo tests/{archivo}")
+        return
+    for nombre, archivo_caso, debe_pasar in cases:
+        if archivo_caso == archivo:
+            test(nombre, archivo, debe_pasar)
+            return
+    # si no está en la lista de casos, se asume que debe pasar
+    test(archivo, archivo, True)
+
 
 if __name__ == "__main__":
-    runtests()
+    if len(sys.argv) > 1:
+        # python3 tests.py precedencia    -> corre solo esa prueba (o varias)
+        for archivo in sys.argv[1:]:
+            correr_uno(archivo)
+    else:
+        # python3 tests.py                -> corre todas las pruebas
+        runtests()

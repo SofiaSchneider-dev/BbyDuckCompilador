@@ -1,0 +1,16 @@
+program Cuadruplos;
+var a, b, c : int;
+    x : float;
+
+main {
+    read(a);
+    b = 3;
+    c = a + b * 2 - 1;
+    x = (a + b) * c / 2.5;
+    c = -a + 4;
+    if (x > c) [
+        print('x es mayor');
+    ];
+    print('resultado:', c, x);
+}
+end

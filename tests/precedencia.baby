@@ -1,0 +1,9 @@
+program Precedencia;
+var A, B, C, D, E, F : int;
+    R : float;
+
+main {
+    R = A * B + C - D * E / F;
+    R = A * (B + C * D - E) + F;
+}
+end

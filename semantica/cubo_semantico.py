@@ -45,8 +45,6 @@ class CuboSemantico:
     def resultado(self, izq, der, op):
         "Tipo del resultado o ERROR si no existe"
         res = self.tabla.get((izq, der), {}).get(op, ERROR)
-        if res == ERROR:
-            print(f"Error semántico: operación {izq} {op} {der} no permitida")
         return res
 
 

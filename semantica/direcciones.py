@@ -6,6 +6,12 @@ RANGOS = {
     ('global', 'float'): 3000,
     ('local', 'int'): 5000,
     ('local', 'float'): 7000,
+    ('temporal', 'int'): 9000,
+    ('temporal', 'float'): 11000,
+    ('temporal', 'bool'): 13000,
+    ('constante', 'int'): 15000,
+    ('constante', 'float'): 17000,
+    ('constante', 'string'): 19000,
 }
 TAMANO = 2000
 
@@ -26,7 +32,7 @@ class Direcciones:
         return direccion
 
     def reiniciar_locales(self):
-        # cada función empieza sus locales desde la primera dirección
+        # cada función empieza sus locales y temporales desde la primera dirección
         for segmento, tipo in self.contadores:
-            if segmento == 'local':
+            if segmento in ('local', 'temporal'):
                 self.contadores[(segmento, tipo)] = 0
