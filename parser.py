@@ -133,7 +133,8 @@ def p_statement(p):
 
 def p_assign(p):
     'assign : ID ASSIGNOP expression FINISHDOT'
-    dir_func.buscar_variable(p[1], p.lineno(1))
+    var = dir_func.buscar_variable(p[1], p.lineno(1))
+    gen.asignar(var['direccion'], var['tipo'], p.lineno(1))  
 
 
 def p_condition(p):
@@ -158,14 +159,20 @@ def p_printlist(p):
                  | printlist REPEATDOT printelem'''
 
 
-def p_printelem(p):
-    '''printelem : expression
-                 | CTE_STRING'''
+def p_printelem_exp(p):
+    'printelem : expression'
+    gen.imprimir_expresion(p.lexer.lineno)     # PRINT del resultado de la expresión
+
+
+def p_printelem_str(p):
+    'printelem : CTE_STRING'
+    gen.imprimir_letrero(p[1])                 # PRINT del letrero
 
 
 def p_readstatement(p):
     'readstatement : READ OPENPAR ID CLOSEPAR FINISHDOT'
-    dir_func.buscar_variable(p[3], p.lineno(3))
+    var = dir_func.buscar_variable(p[3], p.lineno(3))
+    gen.leer(var['direccion'])                 # cuádruplo READ
 
 
 def p_returnstatement(p):
