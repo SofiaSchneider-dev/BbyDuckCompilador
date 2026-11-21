@@ -4,6 +4,7 @@ import ply.yacc as yacc
 from lexer import tokens
 from semantica.directorio_funciones import DirectorioFunciones
 from semantica.generador import GeneradorCuadruplos
+from semantica.errores import error_semantico
 
 dir_func = None   # el directorio de funcones se inicializa cuando se encuentra la palabra reservada "program"
 gen = None        # generador de cuádruplos se crea en "program"
@@ -17,11 +18,14 @@ class ErrorSintactico(Exception):
 
 def p_programa(p):
     'programa : prog_head FINISHDOT listvars listfuncs main_palabra body END'
+    gen.fin_programa()                         # cuádruplo END
+    dir_func.terminar_programa()               # se guardan los recursos del programa
 
 
 def p_main_palabra(p):
     'main_palabra : MAIN'
     dir_func.Direcciones.reiniciar_locales()   # main empieza sus temporales desde la primera dirección
+    gen.inicio_main()                          # se llena el GOTO main del inicio
 
 
 def p_prog_head(p):
@@ -34,6 +38,7 @@ def p_program_palabra(p):
     global dir_func, gen
     dir_func = DirectorioFunciones()
     gen = GeneradorCuadruplos(dir_func.Direcciones) 
+    gen.inicio_programa()                      # GOTO main (destino pendiente)
 
 
 def p_listvars(p):
@@ -79,8 +84,14 @@ def p_listfuncs(p):
 
 
 def p_funcs(p):
-    'funcs : func_head OPENPAR paramslist CLOSEPAR OPENBRACKET listvars body CLOSEBRACKET FINISHDOT'
-    dir_func.terminar_funcion()
+    'funcs : func_head OPENPAR paramslist CLOSEPAR func_vars body CLOSEBRACKET FINISHDOT'
+    gen.fin_funcion()                          # cuádruplo ENDFUNC
+    dir_func.terminar_funcion()                # valida el return, guarda recursos y borra la tabla
+
+
+def p_func_vars(p):
+    'func_vars : OPENBRACKET listvars'
+    dir_func.funcion_actual()['inicio'] = gen.cont()   # aquí empieza el código de la función
 
 
 def p_func_head(p):
@@ -120,9 +131,15 @@ def p_liststatement(p):
                      | empty'''
 
 
+def p_statement_call(p):
+    'statement : call FINISHDOT'
+    nombre, funcion, linea = p[1]
+    if funcion['tipo'] != 'void':
+        error_semantico(f"la función '{nombre}' regresa un valor y debe usarse en una expresión", linea)
+
+
 def p_statement(p):
     '''statement : assign
-                 | call FINISHDOT
                  | condition
                  | cycle
                  | printstatement
@@ -200,6 +217,13 @@ def p_readstatement(p):
 
 def p_returnstatement(p):
     'returnstatement : RETURN expression FINISHDOT'
+    if dir_func.en_programa():
+        error_semantico("return solo puede usarse dentro de una función", p.lineno(1))
+    funcion = dir_func.funcion_actual()
+    if funcion['tipo'] == 'void':
+        error_semantico(f"la función '{dir_func.actual}' es void y no puede tener return", p.lineno(1))
+    gen.regresar(funcion['tipo'], funcion['retorno'], p.lineno(1))
+    funcion['tiene_return'] = True
 
 
 # ===================== Expresiones =====================
@@ -257,12 +281,19 @@ def p_op_term(p):
 def p_factor(p):
     '''factor : abre_par expression CLOSEPAR
               | idorcte
-              | EXPOPERATOR idorcte
-              | call'''
+              | EXPOPERATOR idorcte'''
     if len(p) == 4:
         gen.POper.pop()                        # sacar fondo falso
     elif len(p) == 3 and p[1] == '-':
         gen.negar(p.lineno(1))                
+
+
+def p_factor_call(p):
+    'factor : call'
+    nombre, funcion, linea = p[1]
+    if funcion['tipo'] == 'void':
+        error_semantico(f"la función '{nombre}' es void y no se puede usar en una expresión", linea)
+    gen.valor_llamada(funcion)                 # = global de la función -> temporal
 
 
 def p_abre_par(p):
@@ -291,14 +322,27 @@ def p_cte(p):
 
 
 def p_call(p):
-    '''call : ID OPENPAR arglist CLOSEPAR
-            | ID OPENPAR CLOSEPAR'''
-    dir_func.buscar_funcion(p[1], p.lineno(1))
+    '''call : call_head arglist CLOSEPAR
+            | call_head CLOSEPAR'''
+    nombre, funcion = gen.fin_llamada(p.lineno(1))   # valida número de argumentos y GOSUB
+    p[0] = (nombre, funcion, p.lineno(1))
+
+
+def p_call_head(p):
+    'call_head : ID OPENPAR'
+    funcion = dir_func.buscar_funcion(p[1], p.lineno(1))   # la función debe existir
+    gen.inicio_llamada(p[1], funcion)                       # ERA y fondo falso
+    p.set_lineno(0, p.lineno(1))
 
 
 def p_arglist(p):
-    '''arglist : expression
-               | arglist REPEATDOT expression'''
+    '''arglist : arg
+               | arglist REPEATDOT arg'''
+
+
+def p_arg(p):
+    'arg : expression'
+    gen.argumento(p.lexer.lineno)              # valida el tipo y genera PARAM
 
 
 def p_empty(p):

@@ -19,6 +19,7 @@ class GeneradorCuadruplos:
         self.PTipos = Pila()
         self.fila = Fila()
         self.PSaltos = Pila()                      # saltos pendientes (posiciones de cuádruplos por llenar)
+        self.PLlamadas = Pila()                    # llamadas pendientes: función y número de argumento (k)
         self.direcciones = direcciones             
         self.constantes = TablaConstantes(direcciones)
 
@@ -133,3 +134,72 @@ class GeneradorCuadruplos:
         regreso = self.PSaltos.pop()
         self.fila.agregar(Cuadruplo('GOTO', resultado=regreso))
         self.rellenar(fin, self.cont())
+
+
+    # ----- Programa y funciones -----
+
+    def inicio_programa(self):
+        # el primer cuádruplo salta a main (destino pendiente)
+        self.fila.agregar(Cuadruplo('GOTO'))
+        self.PSaltos.push(self.cont() - 1)
+
+    def inicio_main(self):
+        # se llena el GOTO del inicio con el cuádruplo donde empieza main
+        self.rellenar(self.PSaltos.pop(), self.cont())
+
+    def regresar(self, tipo_funcion, direccion_retorno, linea=None):
+        # return expresión  ->  ('RETURN', valor, -1, variable global de la función)
+        valor = self.PilaO.pop()
+        tipo = self.PTipos.pop()
+        if cubo.resultado(tipo_funcion, tipo, '=') == ERROR:
+            error_semantico(f"no se puede regresar {tipo} en una función {tipo_funcion}", linea)
+        self.fila.agregar(Cuadruplo('RETURN', valor, resultado=direccion_retorno))
+
+    def fin_funcion(self):
+        self.fila.agregar(Cuadruplo('ENDFUNC'))
+
+    def fin_programa(self):
+        self.fila.agregar(Cuadruplo('END'))
+
+
+    # ----- Llamadas a función -----
+
+    def inicio_llamada(self, nombre, funcion):
+        # ERA antes de evaluar los argumentos, y se empieza a contar los argumentos 
+        self.fila.agregar(Cuadruplo('ERA', resultado=nombre))
+        self.PLlamadas.push({'nombre': nombre, 'funcion': funcion, 'k': 0})
+        self.agregar_operador('(')                 # fondo falso: los argumentos no se mezclan con la expresión de afuera
+
+    def argumento(self, linea=None):
+        # se saca el argumento, se valida contra el parámetro k y se genera PARAM
+        llamada = self.PLlamadas.top()
+        nombre = llamada['nombre']
+        params = llamada['funcion']['params']
+        k = llamada['k']
+        argumento = self.PilaO.pop()
+        tipo = self.PTipos.pop()
+        if k >= len(params):
+            error_semantico(f"la función '{nombre}' recibe {len(params)} argumento(s)", linea)
+        if cubo.resultado(params[k], tipo, '=') == ERROR:
+            error_semantico(f"el argumento {k + 1} de '{nombre}' debe ser {params[k]}, no {tipo}", linea)
+        self.fila.agregar(Cuadruplo('PARAM', argumento, resultado=k + 1))
+        llamada['k'] += 1
+
+    def fin_llamada(self, linea=None):
+        # se valida que no falten argumentos y se genera GOSUB
+        llamada = self.PLlamadas.pop()
+        nombre = llamada['nombre']
+        funcion = llamada['funcion']
+        if llamada['k'] != len(funcion['params']):
+            error_semantico(f"la función '{nombre}' recibe {len(funcion['params'])} argumento(s), "
+                            f"se mandaron {llamada['k']}", linea)
+        self.POper.pop()                           # se saca el fondo falso
+        self.fila.agregar(Cuadruplo('GOSUB', nombre, resultado=funcion['inicio']))
+        return nombre, funcion
+
+    def valor_llamada(self, funcion):
+        # se copia el resultado de la variable global a un temporal (para no perderlo con otra llamada)
+        tipo = funcion['tipo']
+        temporal = self.direcciones.nueva_direccion('temporal', tipo)
+        self.fila.agregar(Cuadruplo('=', funcion['retorno'], resultado=temporal))
+        self.agregar_operando(temporal, tipo)

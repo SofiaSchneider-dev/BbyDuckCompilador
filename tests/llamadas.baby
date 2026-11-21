@@ -1,0 +1,29 @@
+program Llamadas;
+var a, b : int;
+    r : float;
+
+int doble(n : int) [
+    {
+        return n * 2;
+    }
+];
+
+float promedio(x : float, y : float) [
+    {
+        return (x + y) / 2;
+    }
+];
+
+void muestra(v : int) [
+    {
+        print('valor:', v);
+    }
+];
+
+main {
+    a = 3;
+    b = doble(a) + doble(a + 1);
+    r = promedio(a, 2.5);
+    muestra(doble(b));
+}
+end

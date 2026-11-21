@@ -1,0 +1,35 @@
+program Funciones;
+var x : int;
+    r : float;
+
+int doble(n : int) [
+    {
+        return n * 2;
+    }
+];
+
+float promedio(a : int, b : int) [
+    var suma : float;
+    {
+        suma = a + b;
+        return suma / 2;
+    }
+];
+
+void cuenta(limite : int) [
+    var i : int;
+    {
+        i = 0;
+        while (i < limite) do [
+            print(i);
+            i = i + 1;
+        ];
+    }
+];
+
+main {
+    x = 3;
+    r = x * 1.5;
+    print(r);
+}
+end

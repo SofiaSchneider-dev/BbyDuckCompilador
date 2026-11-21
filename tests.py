@@ -60,6 +60,9 @@ cases = [
     ("Imprimir una comparación", "error_imprimir_comparacion.baby", False),
     ("If, if-else e if anidado", "if_else.baby", True),
     ("While con if adentro", "ciclo.baby", True),
+    ("Declaración de funciones", "declaracion_funciones.baby", True),
+    ("Llamadas a funciones", "llamadas.baby", True),
+    ("Recursion", "factorial.baby", True),
 ]
 
 
