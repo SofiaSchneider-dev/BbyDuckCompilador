@@ -2,6 +2,7 @@ from semantica.estructuras import Pila, Fila
 from semantica.cuadruplo import Cuadruplo, imprimir_cuadruplos
 from semantica.cubo_semantico import cubo, ERROR, BOOL
 from semantica.tabla_constantes import TablaConstantes
+from semantica.errores import error_semantico
 
 
 class GeneradorCuadruplos:
@@ -48,9 +49,7 @@ class GeneradorCuadruplos:
 
         tipo = cubo.resultado(tipo_izq, tipo_der, operador)
         if tipo == ERROR:
-            donde = f" en línea {linea}" if linea else ""
-            raise Exception(f"Error semántico{donde}: no se puede hacer "
-                            f"{tipo_izq} {operador} {tipo_der}")
+            error_semantico(f"no se puede hacer {tipo_izq} {operador} {tipo_der}", linea)
 
         resultado = self.direcciones.nueva_direccion('temporal', tipo) 
         self.fila.agregar(Cuadruplo(operador, izq, der, resultado))
@@ -72,8 +71,7 @@ class GeneradorCuadruplos:
         resultado = self.PilaO.pop()
         tipo = self.PTipos.pop()
         if cubo.resultado(tipo_var, tipo, '=') == ERROR:
-            donde = f" en línea {linea}" if linea else ""
-            raise Exception(f"Error semántico{donde}: no se puede asignar {tipo} a una variable {tipo_var}")
+            error_semantico(f"no se puede asignar {tipo} a una variable {tipo_var}", linea)
         self.fila.agregar(Cuadruplo('=', resultado, resultado=direccion_var))
 
     def imprimir_expresion(self, linea=None):
@@ -81,8 +79,7 @@ class GeneradorCuadruplos:
         resultado = self.PilaO.pop()
         tipo = self.PTipos.pop()
         if tipo == BOOL:
-            donde = f" en línea {linea}" if linea else ""
-            raise Exception(f"Error semántico{donde}: no se puede imprimir una comparación")
+            error_semantico("no se puede imprimir una comparación", linea)
         self.fila.agregar(Cuadruplo('PRINT', resultado=resultado))
 
     def imprimir_letrero(self, texto):
@@ -110,8 +107,7 @@ class GeneradorCuadruplos:
         tipo = self.PTipos.pop()
         resultado = self.PilaO.pop()
         if tipo != BOOL:
-            donde = f" en línea {linea}" if linea else ""
-            raise Exception(f"Error semántico{donde}: la condición del {estatuto} debe ser una comparación")
+            error_semantico(f"la condición del {estatuto} debe ser una comparación", linea)
         self.fila.agregar(Cuadruplo('GOTOF', resultado))
         self.PSaltos.push(self.cont() - 1)
 

@@ -1,5 +1,6 @@
 from semantica.direcciones import Direcciones
 from semantica.tabla_variables import TablaVariables
+from semantica.errores import error_semantico
 
 
 class DirectorioFunciones:
@@ -38,8 +39,7 @@ class DirectorioFunciones:
         # en la que está según si estamos en el programa o en una función
         for nombre, linea in ids:
             if tabla.existe(nombre):
-                raise Exception(f"Error semántico en línea {linea}: "
-                                f"la variable '{nombre}' ya está declarada")
+                error_semantico(f"la variable '{nombre}' ya está declarada", linea)
             tabla.agregar(nombre, tipo, self.Direcciones.nueva_direccion(segmento, tipo))
             # agregar la variable a la tabla de variables de la función actual con tipo y direcci´øn nueva
 
@@ -49,15 +49,13 @@ class DirectorioFunciones:
             tabla = self.funciones[alcance]['tabla']
             if tabla is not None and tabla.existe(nombre):
                 return tabla.buscar(nombre)
-        raise Exception(f"Error semántico en línea {linea}: "
-                        f"la variable '{nombre}' no está declarada")
+        error_semantico(f"la variable '{nombre}' no está declarada", linea)
 
 
     def agregar_funcion(self, nombre, tipo, linea):
         if nombre in self.funciones:
             # si ya está declarada como funcion o programa
-            raise Exception(f"Error semántico en línea {linea}: "
-                            f"el nombre '{nombre}' ya está declarado como función o programa")
+            error_semantico(f"el nombre '{nombre}' ya está declarado como función o programa", linea)
         self.funciones[nombre] = {
             'tipo': tipo,      # void, int o float
             'tabla': None,     # su tabla de variables
@@ -77,8 +75,7 @@ class DirectorioFunciones:
 
     def buscar_funcion(self, nombre, linea):
         if nombre not in self.funciones or nombre == self.programa:
-            raise Exception(f"Error semántico en línea {linea}: "
-                            f"la función '{nombre}' no está declarada")
+            error_semantico(f"la función '{nombre}' no está declarada", linea)
         return self.funciones[nombre]
 
 
