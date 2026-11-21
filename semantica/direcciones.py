@@ -40,5 +40,9 @@ class Direcciones:
     def recursos(self, segmentos):
         # cuántas direcciones se usaron de cada tipo en esos segmentos, por ejemplo
         # {('local', 'int'): 2, ('temporal', 'bool'): 1}
-        return {llave: cantidad for llave, cantidad in self.contadores.items()
-                if llave[0] in segmentos and cantidad > 0}
+        resultado = {}
+        for llave, cantidad in self.contadores.items():
+            segmento = llave[0]
+            if segmento in segmentos and cantidad > 0:
+                resultado[llave] = cantidad
+        return resultado

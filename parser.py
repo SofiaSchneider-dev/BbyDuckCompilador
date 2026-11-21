@@ -209,7 +209,10 @@ def p_returnstatement(p):
 def p_expression(p):
     '''expression : exp
                   | exp op_rel exp'''
-    linea = p.lineno(2) if len(p) == 4 else None
+    if len(p) == 4:
+        linea = p.lineno(2)       # línea del operador
+    else:
+        linea = None              # no hay operador
     gen.generar_si(('>', '<', '!='), linea)   #  si arriba hay un relacional se genera
 
 
@@ -222,7 +225,10 @@ def p_op_rel(p):
 def p_exp(p):
     '''exp : term
            | exp op_exp term'''
-    linea = p.lineno(2) if len(p) == 4 else None
+    if len(p) == 4:
+        linea = p.lineno(2)       # línea del operador
+    else:
+        linea = None              # no hay operador
     gen.generar_si(('+', '-'), linea)          
 
 
@@ -235,7 +241,10 @@ def p_op_exp(p):
 def p_term(p):
     '''term : factor
             | term op_term factor'''
-    linea = p.lineno(2) if len(p) == 4 else None
+    if len(p) == 4:
+        linea = p.lineno(2)       # línea del operador
+    else:
+        linea = None              # no hay operador
     gen.generar_si(('*', '/'), linea)         
 
 
@@ -274,7 +283,10 @@ def p_idorcte_cte(p):
 def p_cte(p):
     '''cte : CTE_INT
            | CTE_FLOAT'''
-    tipo = 'int' if p.slice[1].type == 'CTE_INT' else 'float'
+    if p.slice[1].type == 'CTE_INT':
+        tipo = 'int'
+    else:
+        tipo = 'float'
     gen.agregar_constante(p[1], tipo)          # se mete la dirección de la constante
 
 

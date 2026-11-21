@@ -65,7 +65,10 @@ cases = [
 
 def runtests():
 
-    passed = sum(test(nombre, archivo, debe_pasar) for nombre, archivo, debe_pasar in cases)
+    passed = 0
+    for nombre, archivo, debe_pasar in cases:
+        if test(nombre, archivo, debe_pasar):
+            passed += 1
 
     print(f"Pruebas: {passed}/{len(cases)} dieron el resultado esperado")
 

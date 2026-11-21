@@ -44,8 +44,12 @@ class CuboSemantico:
 
     def resultado(self, izq, der, op):
         "Tipo del resultado o ERROR si no existe"
-        res = self.tabla.get((izq, der), {}).get(op, ERROR)
-        return res
+        if (izq, der) not in self.tabla:
+            return ERROR                  # no existe esa combinación de tipos
+        operadores = self.tabla[(izq, der)]
+        if op not in operadores:
+            return ERROR                  # ese operador no se puede usar con esos tipos
+        return operadores[op]
 
 
 cubo = CuboSemantico()
