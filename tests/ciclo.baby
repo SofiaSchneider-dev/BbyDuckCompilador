@@ -1,0 +1,16 @@
+program Ciclo;
+var i, suma : int;
+
+main {
+    i = 0;
+    suma = 0;
+    while (i < 10) do [
+        suma = suma + i;
+        if (suma > 20) [
+            print('suma mayor a 20');
+        ];
+        i = i + 1;
+    ];
+    print(suma);
+}
+end

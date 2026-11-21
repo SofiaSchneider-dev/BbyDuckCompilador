@@ -1,0 +1,26 @@
+program IfElse;
+var a, b, c : int;
+
+main {
+    read(a);
+    read(b);
+    if (a > b) [
+        print('a es mayor');
+    ];
+    if (a < b) [
+        c = b - a;
+    ] else [
+        c = a - b;
+    ];
+    if (a != 0) [
+        if (b > 0) [
+            print('los dos');
+        ] else [
+            print('solo a');
+        ];
+    ] else [
+        print('a es cero');
+    ];
+    print(c);
+}
+end

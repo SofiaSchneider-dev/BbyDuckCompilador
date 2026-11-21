@@ -58,6 +58,8 @@ cases = [
     ("Precedencia y paréntesis", "precedencia.baby", True),
     ("Asignar float a int", "error_tipo_asignacion.baby", False),
     ("Imprimir una comparación", "error_imprimir_comparacion.baby", False),
+    ("If, if-else e if anidado", "if_else.baby", True),
+    ("While con if adentro", "ciclo.baby", True),
 ]
 
 

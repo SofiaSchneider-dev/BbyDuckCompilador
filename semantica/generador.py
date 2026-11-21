@@ -17,6 +17,7 @@ class GeneradorCuadruplos:
         self.PilaO = Pila()
         self.PTipos = Pila()
         self.fila = Fila()
+        self.PSaltos = Pila()                      # saltos pendientes (posiciones de cuádruplos por llenar)
         self.direcciones = direcciones             
         self.constantes = TablaConstantes(direcciones)
 
@@ -92,3 +93,47 @@ class GeneradorCuadruplos:
     def leer(self, direccion_var):
         # read(x)  ->  ('READ', -1, -1, x)
         self.fila.agregar(Cuadruplo('READ', resultado=direccion_var))
+
+
+    # ----- Saltos (if / else / while) -----
+
+    def cont(self):
+        # número del siguiente cuádruplo que se va a generar
+        return len(self.fila.elementos)
+
+    def rellenar(self, posicion, destino):
+        # FILL: se llena el destino del salto que estaba pendiente
+        self.fila.elementos[posicion].resultado = destino
+
+    def gotof(self, estatuto, linea=None):
+        # la condición debe ser bool; se genera GOTOF con el destino pendiente
+        tipo = self.PTipos.pop()
+        resultado = self.PilaO.pop()
+        if tipo != BOOL:
+            donde = f" en línea {linea}" if linea else ""
+            raise Exception(f"Error semántico{donde}: la condición del {estatuto} debe ser una comparación")
+        self.fila.agregar(Cuadruplo('GOTOF', resultado))
+        self.PSaltos.push(self.cont() - 1)
+
+    def inicio_else(self):
+        # GOTO para saltarse el else (destino pendiente) y se llena el GOTOF hacia el else
+        self.fila.agregar(Cuadruplo('GOTO'))
+        falso = self.PSaltos.pop()
+        self.PSaltos.push(self.cont() - 1)
+        self.rellenar(falso, self.cont())
+
+    def fin_if(self):
+        # se llena el último salto pendiente del if con el cuádruplo que sigue
+        fin = self.PSaltos.pop()
+        self.rellenar(fin, self.cont())
+
+    def inicio_while(self):
+        # se guarda dónde empieza la condición, para regresar ahí
+        self.PSaltos.push(self.cont())
+
+    def fin_while(self):
+        # GOTO de regreso a la condición y se llena el GOTOF para salir del ciclo
+        fin = self.PSaltos.pop()
+        regreso = self.PSaltos.pop()
+        self.fila.agregar(Cuadruplo('GOTO', resultado=regreso))
+        self.rellenar(fin, self.cont())

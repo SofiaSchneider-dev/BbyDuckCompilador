@@ -138,16 +138,39 @@ def p_assign(p):
 
 
 def p_condition(p):
-    'condition : IF OPENPAR expression CLOSEPAR statement elsepart FINISHDOT'
+    'condition : if_cond statement elsepart FINISHDOT'
+    gen.fin_if()                               # llenar el último salto pendiente
+
+
+def p_if_cond(p):
+    'if_cond : IF OPENPAR expression CLOSEPAR'
+    gen.gotof('if', p.lineno(1))               # GOTOF con destino pendiente
 
 
 def p_elsepart(p):
-    '''elsepart : ELSE statement
+    '''elsepart : else_palabra statement
                 | empty'''
 
 
+def p_else_palabra(p):
+    'else_palabra : ELSE'
+    gen.inicio_else()                          # GOTO al final y llenar el GOTOF
+
+
 def p_cycle(p):
-    'cycle : WHILE OPENPAR expression CLOSEPAR DO statement FINISHDOT'
+    'cycle : while_cond DO statement FINISHDOT'
+    gen.fin_while()                            # GOTO de regreso y llenar el GOTOF
+
+
+def p_while_cond(p):
+    'while_cond : while_palabra OPENPAR expression CLOSEPAR'
+    gen.gotof('while', p.lineno(1))            # GOTOF con destino pendiente
+
+
+def p_while_palabra(p):
+    'while_palabra : WHILE'
+    gen.inicio_while()                         # guardar dónde empieza la condición
+    p.set_lineno(0, p.lineno(1))
 
 
 def p_printstatement(p):
