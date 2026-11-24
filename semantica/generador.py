@@ -182,7 +182,8 @@ class GeneradorCuadruplos:
             error_semantico(f"la función '{nombre}' recibe {len(params)} argumento(s)", linea)
         if cubo.resultado(params[k], tipo, '=') == ERROR:
             error_semantico(f"el argumento {k + 1} de '{nombre}' debe ser {params[k]}, no {tipo}", linea)
-        self.fila.agregar(Cuadruplo('PARAM', argumento, resultado=k + 1))
+        direccion_param = llamada['funcion']['param_dirs'][k]     # dirección del parámetro k en la función
+        self.fila.agregar(Cuadruplo('PARAM', argumento, resultado=direccion_param))
         llamada['k'] += 1
 
     def fin_llamada(self, linea=None):

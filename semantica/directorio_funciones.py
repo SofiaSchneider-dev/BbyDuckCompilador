@@ -64,6 +64,7 @@ class DirectorioFunciones:
             'tipo': tipo,      # void, int o float
             'tabla': None,     # su tabla de variables
             'params': [],      # tipos de los parámetros en orden
+            'param_dirs': [],  # direcciones de los parámetros en orden
             'inicio': None,    # cuádruplo donde empieza la función
             'recursos': {},    # cuántas locales y temporales usa, por tipo
             'retorno': direccion_retorno,  # dirección global donde se guarda el return
@@ -77,6 +78,8 @@ class DirectorioFunciones:
     def agregar_parametro(self, nombre, tipo, linea):
         self.declarar_variables([(nombre, linea)], tipo) #agregar la variable 
         self.funcion_actual()['params'].append(tipo) # agregar el tipo del parametro 
+        direccion = self.funcion_actual()['tabla'].buscar(nombre)['direccion']
+        self.funcion_actual()['param_dirs'].append(direccion) # agregar la dirección del parámetro
 
     def agregar_global_retorno(self, nombre, tipo, linea):
         # se da de alta una variable global con el nombre de la función
